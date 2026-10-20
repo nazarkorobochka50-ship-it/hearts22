@@ -26,7 +26,15 @@
   smokeContext.scale(0.5, 0.5);
   const random = (min, max) => min + Math.random() * (max - min);
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-  const FLOAT_COUNT = 140;
+  const compactMode = window.matchMedia("(max-width: 700px)").matches
+    || (navigator.hardwareConcurrency > 0 && navigator.hardwareConcurrency <= 4);
+  const FLOAT_COUNT = compactMode ? 54 : 140;
+  const HEART_PARTICLE_COUNT = compactMode ? 4600 : 9500;
+  const GLINT_COUNT = compactMode ? 105 : 240;
+  const RISING_COUNT = compactMode ? 150 : 360;
+  const CURRENT_COUNT = compactMode ? 18 : 46;
+  const SMOKE_COUNT = compactMode ? 28 : 105;
+  const BURST_COUNT = compactMode ? 7 : 12;
   const BLUE_SHADES = [
     "#3b82f6", "#60a5fa", "#93c5fd",
     "#2563eb", "#bfdbfe", "#1d4ed8"
@@ -44,7 +52,7 @@
 
   const colors = ["#d8efff", "#278cff", "#55efff"];
   const particlePaths = colors.map(() => new Path2D());
-  for (let i = 0; i < 9500; i++) {
+  for (let i = 0; i < HEART_PARTICLE_COUNT; i++) {
     const x = random(105, 615);
     const y = random(325, 785);
     if (!particleContext.isPointInPath(heartPath, x, y)) continue;
@@ -131,8 +139,7 @@
   }
 
   function spawnHeartBurst(x, y) {
-    const count = 12;
-    for (let i = 0; i < count; i++) {
+    for (let i = 0; i < BURST_COUNT; i++) {
       burstParticles.push(new Particle(x + random(-12, 12), y + random(-5, 5), "burst"));
     }
   }
@@ -173,23 +180,23 @@
     context.restore();
   }
 
-  for (let i = 0; i < 240; i++) {
+  for (let i = 0; i < GLINT_COUNT; i++) {
     const particle = particles[Math.floor(random(0, particles.length))];
     glints.push({
       x: particle.x, y: particle.y, phase: random(0, Math.PI * 2),
       size: random(1, 2.8), color: Math.random() > 0.5 ? "#a8faff" : "#7cc6ff"
     });
   }
-  for (let i = 0; i < 360; i++) {
+  for (let i = 0; i < RISING_COUNT; i++) {
     risingParticles.push({
       x: random(-1, 1), drift: random(-1, 1), speed: random(45, 150),
       phase: random(0, 8), size: random(0.8, 2.4)
     });
   }
-  for (let i = 0; i < 46; i++) {
+  for (let i = 0; i < CURRENT_COUNT; i++) {
     currents.push({ offset: random(-105, 105), phase: random(0, Math.PI * 2), bend: random(15, 60) });
   }
-  for (let i = 0; i < 105; i++) {
+  for (let i = 0; i < SMOKE_COUNT; i++) {
     smokePuffs.push({
       phase: random(0, 8), speed: random(30, 72), drift: random(-1, 1),
       size: random(35, 90), opacity: random(0.035, 0.09)
@@ -209,7 +216,7 @@
   spriteContext.fillRect(0, 0, 128, 128);
 
   function resize() {
-    const ratio = Math.min(window.devicePixelRatio || 1, 1.5);
+    const ratio = Math.min(window.devicePixelRatio || 1, compactMode ? 1 : 1.5);
     canvas.width = Math.round(window.innerWidth * ratio);
     canvas.height = Math.round(window.innerHeight * ratio);
     const scale = Math.min(canvas.width / width, canvas.height / height);
@@ -381,7 +388,7 @@
 
   let lastFrame = 0;
   let animationFrame = 0;
-  const frameInterval = 1000 / 30;
+  const frameInterval = 1000 / (compactMode ? 24 : 30);
   let nextBurstAt = 0;
 
   function animate(timestamp) {
